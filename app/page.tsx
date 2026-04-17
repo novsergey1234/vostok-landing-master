@@ -123,9 +123,7 @@ export default function VostokLanding() {
 
       context.setTransform(1, 0, 0, 1, 0, 0);
       context.clearRect(0, 0, renderWidth, renderHeight);
-      context.globalAlpha = 0.6;
       context.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-      context.globalAlpha = 1;
     };
 
     const drawFrameFromCache = (index: number) => {
@@ -362,12 +360,12 @@ export default function VostokLanding() {
 
           {/* ... СЦЕНЫ 1-7 ОСТАЮТСЯ БЕЗ ИЗМЕНЕНИЙ (сократил для читаемости, они те же самые) ... */}
           
-          <div className="absolute flex flex-col items-center transition-all duration-1000" style={{ opacity: scrollProgress < 0.04 ? 1 : 0, transform: `translateY(${scrollProgress * 200}px)`, pointerEvents: scrollProgress < 0.05 ? 'auto' : 'none' }}>
+          <div className="absolute flex flex-col items-center transition-all duration-1000" style={{ opacity: scrollProgress < 0.05 ? 1 : 0, transform: `translateY(${scrollProgress * 200}px)`, pointerEvents: scrollProgress < 0.05 ? 'auto' : 'none' }}>
             <h1 className="text-6xl md:text-9xl font-black tracking-tighter uppercase mb-2">Восток-Холдинг</h1>
             <p className="text-xl tracking-widest text-gray-400">СЕРДЦЕ ИННОВАЦИЙ</p>
           </div>
 
-          <div className="absolute left-10 md:left-20 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.04 && scrollProgress < 0.08 ? 1 : 0, transform: `translateX(${(0.07 - scrollProgress) * 300}px)`, filter: `blur(${scrollProgress > 0.10 && scrollProgress < 0.25 ? 0 : 10}px)` }}>
+          <div className="absolute left-10 md:left-20 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.05 && scrollProgress < 0.10 ? 1 : 0, transform: `translateX(${(0.075 - scrollProgress) * 500}px)`, filter: `blur(${scrollProgress > 0.10 && scrollProgress < 0.25 ? 0 : 10}px)` }}>
             <div className="bg-white/10 backdrop-blur-lg border border-white/20 p-8 rounded-3xl">
               <div className="text-5xl font-black mb-2">40+</div>
               <h3 className="text-xl font-bold uppercase mb-4">Регионов присутствия</h3>
@@ -376,7 +374,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute right-10 md:right-20 max-w-md transition-all duration-1000" style={{ opacity: scrollProgress > 0.08 && scrollProgress < 0.12 ? 1 : 0, transform: `translateY(${(0.11 - scrollProgress) * -400}px)` }}>
+          <div className="absolute right-10 md:right-20 max-w-md transition-all duration-1000" style={{ opacity: scrollProgress > 0.10 && scrollProgress < 0.15 ? 1 : 0, transform: `translateY(${(0.125 - scrollProgress) * -1000}px)` }}>
             <div className="bg-black/60 backdrop-blur-md border border-gray-600 p-8">
               <h2 className="text-3xl font-black uppercase mb-2">Время — деньги</h2>
               <p className="text-gray-400 text-sm mb-6">Оставьте номер, и наш эксперт свяжется с вами через 2 минуты.</p>
@@ -387,7 +385,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute left-10 md:left-32 max-w-lg transition-all duration-1000" style={{ opacity: scrollProgress > 0.12 && scrollProgress < 0.20 ? 1 : 0, transform: `translateX(${(0.45 - scrollProgress) * -200}px)` }}>
+          <div className="absolute left-10 md:left-32 max-w-lg transition-all duration-1000" style={{ opacity: scrollProgress > 0.15 && scrollProgress < 0.20 ? 1 : 0, transform: `translateX(${(0.175 - scrollProgress) * -500}px)` }}>
             <h2 className="text-5xl md:text-7xl font-black uppercase leading-none mb-6">Закрытая<br/>Экосистема</h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white/5 border border-white/10 p-6 backdrop-blur-sm">
@@ -401,7 +399,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute flex flex-col items-center justify-center transition-all duration-1000 w-full" style={{ opacity: scrollProgress > 0.20 && scrollProgress < 0.30 ? 1 : 0, transform: `scale(${scrollProgress > 0.52 && scrollProgress < 0.72 ? 1 : 0.8})`, pointerEvents: scrollProgress > 0.52 && scrollProgress < 0.72 ? 'auto' : 'none' }}>
+          <div className="absolute flex flex-col items-center justify-center transition-all duration-1000 w-full" style={{ opacity: scrollProgress > 0.20 && scrollProgress < 0.25 ? 1 : 0, transform: `scale(${scrollProgress > 0.20 && scrollProgress < 0.25 ? 1 : 0.8})`, pointerEvents: scrollProgress > 0.20 && scrollProgress < 0.25 ? 'auto' : 'none' }}>
             <div className="text-center bg-black/50 p-12 backdrop-blur-lg w-full">
               <h2 className="text-3xl font-light text-gray-300 mb-4">ПРЯМАЯ ЛИНИЯ ДЛЯ VIP КЛИЕНТОВ</h2>
               <a href="tel:+78000000000" className="text-6xl md:text-8xl font-black tracking-tighter hover:text-gray-300 transition-colors block mb-8">8 800 000 00 00</a>
@@ -409,15 +407,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute right-10 md:right-32 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.30 && scrollProgress < 0.34 ? 1 : 0, transform: `translateY(${(0.76 - scrollProgress) * 300}px)` }}>
-             <div className="border-l-4 border-white pl-8 py-4">
-              <h3 className="text-4xl font-black uppercase mb-4">Уровень защиты: Титан</h3>
-              <p className="text-gray-400 mb-6">Ваши данные защищены алгоритмами квантового шифрования.</p>
-              <button className="bg-white text-black px-6 py-2 font-bold uppercase text-sm hover:bg-gray-300">Скачать аудит</button>
-            </div>
-          </div>
-          
-          <div className="absolute right-10 md:right-32 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.34 && scrollProgress < 0.38 ? 1 : 0, transform: `translateY(${(0.62 - scrollProgress) * 800}px)` }}>
+          <div className="absolute right-10 md:right-32 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.25 && scrollProgress < 0.30 ? 1 : 0, transform: `translateY(${(0.275 - scrollProgress) * 1000}px)` }}>
              <div className="border-l-4 border-white pl-8 py-4">
               <h3 className="text-4xl font-black uppercase mb-4">Уровень защиты: Титан</h3>
               <p className="text-gray-400 mb-6">Ваши данные защищены алгоритмами квантового шифрования.</p>
@@ -425,7 +415,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute right-10 md:right-32 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.38 && scrollProgress < 0.42 ? 1 : 0, transform: `translateY(${(0.66 - scrollProgress) * 800}px)` }}>
+          <div className="absolute left-10 md:left-20 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.30 && scrollProgress < 0.35 ? 1 : 0, transform: `translateY(${(0.325 - scrollProgress) * -1000}px)` }}>
              <div className="border-l-4 border-white pl-8 py-4">
               <h3 className="text-4xl font-black uppercase mb-4">Корпоративный AI</h3>
               <p className="text-gray-400 mb-6">Нейросети для предиктивной аналитики и снижения издержек на 40%.</p>
@@ -433,7 +423,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute left-10 md:left-20 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.42 && scrollProgress < 0.46 ? 1 : 0, transform: `translateY(${(0.68 - scrollProgress) * 800}px)` }}>
+          <div className="absolute right-10 md:right-32 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.35 && scrollProgress < 0.40 ? 1 : 0, transform: `translateY(${(0.375 - scrollProgress) * 1000}px)` }}>
              <div className="border-l-4 border-white pl-8 py-4">
               <h3 className="text-4xl font-black uppercase mb-4">Финансовый HUB</h3>
               <p className="text-gray-400 mb-6">Мгновенные кроссбордерные транзакции с нулевой задержкой и комиссией.</p>
@@ -441,7 +431,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute right-10 md:right-32 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.46 && scrollProgress < 0.50 ? 1 : 0, transform: `translateY(${(0.70 - scrollProgress) * 800}px)` }}>
+          <div className="absolute left-10 md:left-20 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.40 && scrollProgress < 0.45 ? 1 : 0, transform: `translateY(${(0.425 - scrollProgress) * -1000}px)` }}>
              <div className="border-l-4 border-white pl-8 py-4">
               <h3 className="text-4xl font-black uppercase mb-4">Роботизация 4.0</h3>
               <p className="text-gray-400 mb-6">Интеллектуальное машинное зрение для контроля качества на производстве.</p>
@@ -449,7 +439,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute left-10 md:left-20 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.50 && scrollProgress < 0.54 ? 1 : 0, transform: `translateY(${(0.72 - scrollProgress) * 800}px)` }}>
+          <div className="absolute right-10 md:right-32 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.45 && scrollProgress < 0.50 ? 1 : 0, transform: `translateY(${(0.475 - scrollProgress) * 1000}px)` }}>
              <div className="border-l-4 border-white pl-8 py-4">
               <h3 className="text-4xl font-black uppercase mb-4">Распределенные ЦОД</h3>
               <p className="text-gray-400 mb-6">Серверная инфраструктура стандарта Tier IV для доступности 99.99%.</p>
@@ -457,7 +447,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute right-10 md:right-32 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.54 && scrollProgress < 0.58 ? 1 : 0, transform: `translateY(${(0.74 - scrollProgress) * 800}px)` }}>
+          <div className="absolute left-10 md:left-20 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.50 && scrollProgress < 0.55 ? 1 : 0, transform: `translateY(${(0.525 - scrollProgress) * -1000}px)` }}>
              <div className="border-l-4 border-white pl-8 py-4">
               <h3 className="text-4xl font-black uppercase mb-4">Управление активами</h3>
               <p className="text-gray-400 mb-6">Диверсификация портфеля с использованием алгоритмического трейдинга.</p>
@@ -465,7 +455,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute left-10 md:left-20 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.58 && scrollProgress < 0.62 ? 1 : 0, transform: `translateY(${(0.76 - scrollProgress) * 800}px)` }}>
+          <div className="absolute right-10 md:right-32 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.55 && scrollProgress < 0.60 ? 1 : 0, transform: `translateY(${(0.575 - scrollProgress) * 1000}px)` }}>
              <div className="border-l-4 border-white pl-8 py-4">
               <h3 className="text-4xl font-black uppercase mb-4">Big Data Аналитика</h3>
               <p className="text-gray-400 mb-6">Конвертация терабайтов сырых данных в реальные бизнес-инсайты on-the-fly.</p>
@@ -473,7 +463,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute right-10 md:right-32 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.62 && scrollProgress < 0.66 ? 1 : 0, transform: `translateY(${(0.78 - scrollProgress) * 800}px)` }}>
+          <div className="absolute left-10 md:left-20 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.60 && scrollProgress < 0.65 ? 1 : 0, transform: `translateY(${(0.625 - scrollProgress) * -1000}px)` }}>
              <div className="border-l-4 border-white pl-8 py-4">
               <h3 className="text-4xl font-black uppercase mb-4">B2B Коммерция</h3>
               <p className="text-gray-400 mb-6">Единая цифровая платформа для закупок без региональных ограничений.</p>
@@ -481,7 +471,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute left-10 md:left-20 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.66 && scrollProgress < 0.70 ? 1 : 0, transform: `translateY(${(0.80 - scrollProgress) * 800}px)` }}>
+          <div className="absolute right-10 md:right-32 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.65 && scrollProgress < 0.70 ? 1 : 0, transform: `translateY(${(0.675 - scrollProgress) * 1000}px)` }}>
              <div className="border-l-4 border-white pl-8 py-4">
               <h3 className="text-4xl font-black uppercase mb-4">BioTech Решения</h3>
               <p className="text-gray-400 mb-6">Синтез инновационных материалов с помощью компьютерного моделирования.</p>
@@ -489,7 +479,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute right-10 md:right-32 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.70 && scrollProgress < 0.74 ? 1 : 0, transform: `translateY(${(0.82 - scrollProgress) * 800}px)` }}>
+          <div className="absolute left-10 md:left-20 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.70 && scrollProgress < 0.75 ? 1 : 0, transform: `translateY(${(0.725 - scrollProgress) * -1000}px)` }}>
              <div className="border-l-4 border-white pl-8 py-4">
               <h3 className="text-4xl font-black uppercase mb-4">Протокол Zero-Trust</h3>
               <p className="text-gray-400 mb-6">Многоуровневая биометрическая аутентификация для топ-менеджмента.</p>
@@ -497,7 +487,7 @@ export default function VostokLanding() {
             </div>
           </div>
 
-          <div className="absolute left-10 md:left-20 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.74 && scrollProgress < 0.80 ? 1 : 0, transform: `translateY(${(0.84 - scrollProgress) * 800}px)` }}>
+          <div className="absolute right-10 md:right-32 max-w-sm transition-all duration-1000" style={{ opacity: scrollProgress > 0.75 && scrollProgress < 0.81 ? 1 : 0, transform: `translateY(${(0.78 - scrollProgress) * 1000}px)` }}>
              <div className="border-l-4 border-white pl-8 py-4">
               <h3 className="text-4xl font-black uppercase mb-4">Устойчивое развитие</h3>
               <p className="text-gray-400 mb-6">Внедрение ESG-стандартов для минимизации углеродного следа производств.</p>
