@@ -100,6 +100,8 @@ export default function VostokLanding() {
   const isFramesReadyRef = useRef(false);
   const returnHubProgressRef = useRef(0);
   const hubTapLockRef = useRef(false);
+  const hubWheelLockUntilRef = useRef(0);
+  const hubWheelAccumRef = useRef(0);
 
   const [frameFolder, setFrameFolder] = useState('/frames/desktop/truck');
   const [preloadProgress, setPreloadProgress] = useState(0);
@@ -455,11 +457,32 @@ export default function VostokLanding() {
       }
 
       event.preventDefault();
-      setHubProgress((prev) => clamp(prev + wheelDelta * 0.0017, 0, HUB_MAX_PROGRESS));
+
+      const now = performance.now();
+      if (now < hubWheelLockUntilRef.current) {
+        return;
+      }
+
+      hubWheelAccumRef.current += wheelDelta;
+      const threshold = 90;
+
+      if (Math.abs(hubWheelAccumRef.current) < threshold) {
+        return;
+      }
+
+      const direction = hubWheelAccumRef.current > 0 ? 1 : -1;
+      hubWheelAccumRef.current = 0;
+      hubWheelLockUntilRef.current = now + 220;
+
+      setHubProgress((prev) => clamp(Math.round(prev) + direction, 0, HUB_MAX_PROGRESS));
     };
 
     window.addEventListener('wheel', handleHubWheel, { passive: false });
-    return () => window.removeEventListener('wheel', handleHubWheel);
+
+    return () => {
+      hubWheelAccumRef.current = 0;
+      window.removeEventListener('wheel', handleHubWheel);
+    };
   }, [isFramesReady, mode]);
 
   useEffect(() => {
@@ -482,12 +505,12 @@ export default function VostokLanding() {
       tapUnlockTimeout = window.setTimeout(unlockTap, 120);
     };
 
-    const applyHorizontalDelta = (deltaX: number) => {
-      if (Math.abs(deltaX) < 0.4) {
+    const stepByDirection = (direction: number) => {
+      if (direction === 0) {
         return;
       }
 
-      setHubProgress((prev) => clamp(prev + deltaX * 0.01, 0, HUB_MAX_PROGRESS));
+      setHubProgress((prev) => clamp(Math.round(prev) + direction, 0, HUB_MAX_PROGRESS));
     };
 
     const supportsPointer = typeof window !== 'undefined' && 'PointerEvent' in window;
@@ -496,6 +519,7 @@ export default function VostokLanding() {
       const dragState = {
         active: false,
         pointerId: -1,
+        startX: 0,
         lastX: 0,
         moved: false,
       };
@@ -511,6 +535,7 @@ export default function VostokLanding() {
 
         dragState.active = true;
         dragState.pointerId = event.pointerId;
+        dragState.startX = event.clientX;
         dragState.lastX = event.clientX;
         dragState.moved = false;
         hubLayer.setPointerCapture(event.pointerId);
@@ -521,23 +546,25 @@ export default function VostokLanding() {
           return;
         }
 
-        const deltaX = dragState.lastX - event.clientX;
         dragState.lastX = event.clientX;
 
-        if (Math.abs(deltaX) > 2) {
+        if (Math.abs(dragState.startX - event.clientX) > 4) {
           dragState.moved = true;
         }
 
         if (event.pointerType === 'touch') {
           event.preventDefault();
         }
-
-        applyHorizontalDelta(deltaX);
       };
 
       const finishPointer = (event: PointerEvent) => {
         if (!dragState.active || dragState.pointerId !== event.pointerId) {
           return;
+        }
+
+        const totalDeltaX = dragState.startX - dragState.lastX;
+        if (Math.abs(totalDeltaX) > 42) {
+          stepByDirection(totalDeltaX > 0 ? 1 : -1);
         }
 
         if (dragState.moved) {
@@ -546,6 +573,7 @@ export default function VostokLanding() {
 
         dragState.active = false;
         dragState.pointerId = -1;
+        dragState.startX = 0;
         dragState.moved = false;
 
         if (hubLayer.hasPointerCapture(event.pointerId)) {
@@ -572,6 +600,7 @@ export default function VostokLanding() {
 
     const touchState = {
       active: false,
+      startX: 0,
       lastX: 0,
       moved: false,
     };
@@ -587,6 +616,7 @@ export default function VostokLanding() {
       }
 
       touchState.active = true;
+      touchState.startX = touch.clientX;
       touchState.lastX = touch.clientX;
       touchState.moved = false;
     };
@@ -604,12 +634,13 @@ export default function VostokLanding() {
       const deltaX = touchState.lastX - touch.clientX;
       touchState.lastX = touch.clientX;
 
-      if (Math.abs(deltaX) > 2) {
+      if (Math.abs(touchState.startX - touch.clientX) > 4) {
         touchState.moved = true;
       }
 
-      event.preventDefault();
-      applyHorizontalDelta(deltaX);
+      if (Math.abs(deltaX) > 0.1) {
+        event.preventDefault();
+      }
     };
 
     const finishTouch = () => {
@@ -617,11 +648,17 @@ export default function VostokLanding() {
         return;
       }
 
+      const totalDeltaX = touchState.startX - touchState.lastX;
+      if (Math.abs(totalDeltaX) > 42) {
+        stepByDirection(totalDeltaX > 0 ? 1 : -1);
+      }
+
       if (touchState.moved) {
         lockTapAfterDrag();
       }
 
       touchState.active = false;
+      touchState.startX = 0;
       touchState.moved = false;
     };
 
@@ -745,7 +782,7 @@ export default function VostokLanding() {
                 return (
                   <div
                     key={`pair-panel-${pairIndex}`}
-                    className="absolute inset-0 flex items-center justify-center"
+                    className="absolute inset-0 flex items-center justify-center transition-[transform,opacity] duration-500 ease-out"
                     style={{
                       transform: `translate3d(${panelDistance * 100}%, 0, 0) scale(${panelScale})`,
                       opacity: panelOpacity,
@@ -783,7 +820,7 @@ export default function VostokLanding() {
               })}
 
               <div
-                className="absolute inset-0 flex items-center justify-center"
+                className="absolute inset-0 flex items-center justify-center transition-[transform,opacity] duration-500 ease-out"
                 style={{
                   transform: `translate3d(${finalPanelDistance * 100}%, 0, 0) scale(${finalPanelScale})`,
                   opacity: finalPanelOpacity,
