@@ -100,8 +100,7 @@ export default function VostokLanding() {
   const isFramesReadyRef = useRef(false);
   const returnHubProgressRef = useRef(0);
   const hubTapLockRef = useRef(false);
-  const hubWheelLockUntilRef = useRef(0);
-  const hubWheelAccumRef = useRef(0);
+  const hubSnapTimeoutRef = useRef<number | null>(null);
 
   const [frameFolder, setFrameFolder] = useState('/frames/desktop/truck');
   const [preloadProgress, setPreloadProgress] = useState(0);
@@ -138,9 +137,34 @@ export default function VostokLanding() {
     };
   }, []);
 
+  const clearHubSnapTimeout = useCallback(() => {
+    if (hubSnapTimeoutRef.current !== null) {
+      window.clearTimeout(hubSnapTimeoutRef.current);
+      hubSnapTimeoutRef.current = null;
+    }
+  }, []);
+
+  const scheduleHubSnap = useCallback(
+    (delay = 170) => {
+      clearHubSnapTimeout();
+      hubSnapTimeoutRef.current = window.setTimeout(() => {
+        setHubProgress((prev) => clamp(Math.round(prev), 0, HUB_MAX_PROGRESS));
+        hubSnapTimeoutRef.current = null;
+      }, delay);
+    },
+    [clearHubSnapTimeout],
+  );
+
+  useEffect(() => {
+    return () => {
+      clearHubSnapTimeout();
+    };
+  }, [clearHubSnapTimeout]);
+
   const exitToHub = useCallback((progressOverride?: number) => {
     const nextHubProgress = typeof progressOverride === 'number' ? progressOverride : returnHubProgressRef.current;
 
+    clearHubSnapTimeout();
     setMode('hub');
     setSelectedSection(null);
     setSectionProgress(0);
@@ -153,13 +177,14 @@ export default function VostokLanding() {
         scroller.scrollTop = 0;
       }
     });
-  }, []);
+  }, [clearHubSnapTimeout]);
 
   const openSection = useCallback((section: SectionCard, pairIndex: number) => {
     if (hubTapLockRef.current) {
       return;
     }
 
+    clearHubSnapTimeout();
     setSelectedSection(section);
     setMode('section');
     setSectionProgress(0);
@@ -172,7 +197,7 @@ export default function VostokLanding() {
         scroller.scrollTop = 0;
       }
     });
-  }, []);
+  }, [clearHubSnapTimeout]);
 
   useEffect(() => {
     const totalFrames = FRAME_TOTALS[frameFolder] ?? DEFAULT_TOTAL_FRAMES;
@@ -458,32 +483,16 @@ export default function VostokLanding() {
 
       event.preventDefault();
 
-      const now = performance.now();
-      if (now < hubWheelLockUntilRef.current) {
-        return;
-      }
-
-      hubWheelAccumRef.current += wheelDelta;
-      const threshold = 90;
-
-      if (Math.abs(hubWheelAccumRef.current) < threshold) {
-        return;
-      }
-
-      const direction = hubWheelAccumRef.current > 0 ? 1 : -1;
-      hubWheelAccumRef.current = 0;
-      hubWheelLockUntilRef.current = now + 220;
-
-      setHubProgress((prev) => clamp(Math.round(prev) + direction, 0, HUB_MAX_PROGRESS));
+      setHubProgress((prev) => clamp(prev + wheelDelta * 0.00125, 0, HUB_MAX_PROGRESS));
+      scheduleHubSnap(170);
     };
 
     window.addEventListener('wheel', handleHubWheel, { passive: false });
 
     return () => {
-      hubWheelAccumRef.current = 0;
       window.removeEventListener('wheel', handleHubWheel);
     };
-  }, [isFramesReady, mode]);
+  }, [isFramesReady, mode, scheduleHubSnap]);
 
   useEffect(() => {
     if (!isFramesReady || mode !== 'hub') {
@@ -505,12 +514,13 @@ export default function VostokLanding() {
       tapUnlockTimeout = window.setTimeout(unlockTap, 120);
     };
 
-    const stepByDirection = (direction: number) => {
-      if (direction === 0) {
+    const applyHorizontalDelta = (deltaX: number) => {
+      if (Math.abs(deltaX) < 0.4) {
         return;
       }
 
-      setHubProgress((prev) => clamp(Math.round(prev) + direction, 0, HUB_MAX_PROGRESS));
+      setHubProgress((prev) => clamp(prev + deltaX * 0.0095, 0, HUB_MAX_PROGRESS));
+      scheduleHubSnap(140);
     };
 
     const supportsPointer = typeof window !== 'undefined' && 'PointerEvent' in window;
@@ -538,6 +548,7 @@ export default function VostokLanding() {
         dragState.startX = event.clientX;
         dragState.lastX = event.clientX;
         dragState.moved = false;
+        clearHubSnapTimeout();
         hubLayer.setPointerCapture(event.pointerId);
       };
 
@@ -546,6 +557,7 @@ export default function VostokLanding() {
           return;
         }
 
+        const deltaX = dragState.lastX - event.clientX;
         dragState.lastX = event.clientX;
 
         if (Math.abs(dragState.startX - event.clientX) > 4) {
@@ -555,6 +567,8 @@ export default function VostokLanding() {
         if (event.pointerType === 'touch') {
           event.preventDefault();
         }
+
+        applyHorizontalDelta(deltaX);
       };
 
       const finishPointer = (event: PointerEvent) => {
@@ -562,10 +576,7 @@ export default function VostokLanding() {
           return;
         }
 
-        const totalDeltaX = dragState.startX - dragState.lastX;
-        if (Math.abs(totalDeltaX) > 42) {
-          stepByDirection(totalDeltaX > 0 ? 1 : -1);
-        }
+        scheduleHubSnap(120);
 
         if (dragState.moved) {
           lockTapAfterDrag();
@@ -619,6 +630,7 @@ export default function VostokLanding() {
       touchState.startX = touch.clientX;
       touchState.lastX = touch.clientX;
       touchState.moved = false;
+      clearHubSnapTimeout();
     };
 
     const handleTouchMove = (event: TouchEvent) => {
@@ -641,6 +653,8 @@ export default function VostokLanding() {
       if (Math.abs(deltaX) > 0.1) {
         event.preventDefault();
       }
+
+      applyHorizontalDelta(deltaX);
     };
 
     const finishTouch = () => {
@@ -648,10 +662,7 @@ export default function VostokLanding() {
         return;
       }
 
-      const totalDeltaX = touchState.startX - touchState.lastX;
-      if (Math.abs(totalDeltaX) > 42) {
-        stepByDirection(totalDeltaX > 0 ? 1 : -1);
-      }
+      scheduleHubSnap(120);
 
       if (touchState.moved) {
         lockTapAfterDrag();
@@ -677,7 +688,7 @@ export default function VostokLanding() {
       hubLayer.removeEventListener('touchend', finishTouch);
       hubLayer.removeEventListener('touchcancel', finishTouch);
     };
-  }, [isFramesReady, mode]);
+  }, [isFramesReady, mode, clearHubSnapTimeout, scheduleHubSnap]);
 
   useEffect(() => {
     if (mode !== 'section') {
@@ -768,7 +779,7 @@ export default function VostokLanding() {
               <div className="max-w-md border border-white/15 bg-black/45 px-4 py-3 backdrop-blur-sm">
                 <p className="text-xs uppercase tracking-[0.2em] text-gray-500">Навигация</p>
                 <p className="mt-1 text-sm text-gray-200">
-                  На телефоне свайпайте влево/вправо, на ПК скролльте по горизонтали или колесом. Когда карточки проявятся, нажмите на нужный раздел.
+                  Прокручивайте вправо или влево. Карточки двигаются плавно и фиксируются по парам. Когда нужная пара в центре, нажмите на раздел.
                 </p>
               </div>
             </div>
@@ -865,7 +876,7 @@ export default function VostokLanding() {
                     ? 'Конечная точка маршрута'
                     : `Пара ${activePairNumber} из ${pairCount} • горизонтально листайте, чтобы перейти дальше`}
                 </p>
-                <p className="text-[11px] uppercase tracking-[0.18em] text-gray-500">Жест: сдвиг влево для движения по ленте вперед</p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-gray-500">Плавный скролл с фиксацией к ближайшей паре</p>
               </div>
             </div>
           </div>
